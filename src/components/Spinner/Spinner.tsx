@@ -15,9 +15,10 @@ const Spinner: React.FC<SpinnerProps> = ({
   color = '#0abf53',
   size = 'medium',
   className = '',
+  ...rest
 }) => {
   return (
-    <div className={`${styles.spinner} ${className}`}>
+    <div className={`${styles.spinner} ${className}`} {...rest}>
       <svg
         width={SpinnerSizes[size]}
         height={SpinnerSizes[size]}
