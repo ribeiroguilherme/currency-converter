@@ -1,0 +1,9 @@
+.wrapper {
+  color: #5c667b;
+  font-size: 12px;
+}
+
+.wrapper > p:last-child {
+  margin-bottom: 0;
+}
+

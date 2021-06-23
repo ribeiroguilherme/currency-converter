@@ -1,16 +1,3 @@
 .title {
   margin-top: 0;
 }
-
-.currencyRow {
-  display: flex;
-  gap: 8px;
-}
-
-.currencyRow:not(:last-child) {
-  margin-bottom: 8px;
-}
-
-.input {
-  width: 50%;
-}

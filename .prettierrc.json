@@ -4,5 +4,5 @@
   "singleQuote": true,
   "endOfLine": "auto",
   "proseWrap": "always",
-  "printWidth": 80
+  "printWidth": 100
 }

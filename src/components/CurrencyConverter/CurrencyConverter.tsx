@@ -1,66 +1,110 @@
 import * as React from 'react';
+import { useCurrencyConverterApi } from '../../api/useCurrencyConverterApi';
+import { ConversionRatesInfo } from './ConversionRatesInfo';
+import { CurrencyRow } from './CurrencyRow';
+
 import styles from './CurrencyConverter.module.css';
 
-import { Select, Option } from '../Select';
-import { Input } from '../Input';
-import { CurrencySymbols } from 'src/api/ICurrencyConverterApi';
+const CurrencyConverter: React.FC = () => {
+  const currencyApi = useCurrencyConverterApi();
+  const [symbols, setSymbols] = React.useState<string[]>([]);
+  const [fromCurrency, setFromCurrency] = React.useState<string>('');
+  const [toCurrency, setToCurrency] = React.useState<string>('');
+  const [isEdittingUsingFromInput, setIsEdittingUsingFromInput] = React.useState<boolean>(true);
+  const [amount, setAmount] = React.useState<number>(1);
+  const [rates, setRates] = React.useState<Record<string, number>>({});
 
-type CurrencyConverterProps = {
-  symbols: CurrencySymbols;
-}
+  React.useEffect(() => {
+    async function fetchData() {
+      const data = await currencyApi.fetchLatestRates();
 
-function sortByLabel(firstEl: Option, secondEl: Option) {
-  if (firstEl.label < secondEl.label) return -1;
-  if (firstEl.label > secondEl.label) return 1;
-  return 0;
-}
+      const symbols = Object.keys(data.rates);
 
-function mapToSelectOption([key, value]: [string, string]) {
-  return  { value: key, label: value };
-}
+      setSymbols(symbols);
+      setFromCurrency(data.base);
+      setToCurrency(symbols[0]);
+      setRates(data.rates);
+    }
+    fetchData();
+  }, [currencyApi]);
 
-const CurrencyConverter: React.FC<CurrencyConverterProps> = ({ symbols }) => {
+  // const updateRates = React.useCallback(async (baseCurrency, toCurrency) => {
+  //   const data = await currencyApi.fetchLatestRates(fromCurrency, [toCurrency]);
+  //   setRate(data.rates[toCurrency]);
+  // }, [currencyApi, fromCurrency, toCurrency]);
 
-  const selectorOptions = React.useMemo(() => {
-    return Object.entries(symbols).map(mapToSelectOption).sort(sortByLabel);
-  }, [symbols]);
+  React.useEffect(() => {
+    async function fetchData() {
+      const data = await currencyApi.fetchLatestRates(fromCurrency, [toCurrency]);
+      setRates(data.rates);
+    }
+
+    if (fromCurrency && toCurrency) {
+      fetchData();
+    }
+  }, [currencyApi, fromCurrency, toCurrency]);
+
+  const handleOnChangeFromAmount = React.useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      setIsEdittingUsingFromInput(true);
+      setAmount(parseFloat(event.target.value));
+    },
+    [],
+  );
+
+  const handleOnChangeToAmount = React.useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    setIsEdittingUsingFromInput(false);
+    setAmount(parseFloat(event.target.value));
+  }, []);
+
+  const handleOnSelectFromCurrency = React.useCallback(
+    (event: React.ChangeEvent<HTMLSelectElement>) => {
+      setFromCurrency(event.target.value);
+    },
+    [],
+  );
+
+  const handleOnSelectToCurrency = React.useCallback(
+    (event: React.ChangeEvent<HTMLSelectElement>) => {
+      setToCurrency(event.target.value);
+    },
+    [],
+  );
+
+  let fromValue, toValue;
+  const currentRate = rates[toCurrency];
+
+  if (isEdittingUsingFromInput) {
+    toValue = (amount * currentRate).toFixed(2);
+    fromValue = amount;
+  } else {
+    fromValue = (amount / currentRate).toFixed(2);
+    toValue = amount;
+  }
 
   return (
     <>
-    <h5 className={styles.title}>Currency Converter</h5>
+      <h3 className={styles.title}>Currency Converter</h3>
 
-    <div className={styles.currencyRow}>
-      <Input
-        className={styles.input}
-        aria-label="Currency Amount Field"
-        name="currenyAmountField"
-        type="number"
+      <CurrencyRow
+        inputValue={fromValue}
+        currencyValue={fromCurrency}
+        currencySymbols={symbols}
+        onChangeInputValue={handleOnChangeFromAmount}
+        onChangeCurrency={handleOnSelectFromCurrency}
       />
-      <Select
-        className={styles.input}
-        aria-label="Currency Type"
-        name="currencySelector"
-        options={selectorOptions}
+
+      <CurrencyRow
+        inputValue={toValue}
+        currencyValue={toCurrency}
+        currencySymbols={symbols}
+        onChangeInputValue={handleOnChangeToAmount}
+        onChangeCurrency={handleOnSelectToCurrency}
       />
-    </div>
-    <div className={styles.currencyRow}>
-      <Input
-        className={styles.input}
-        aria-label="Currency Amount Field"
-        name="currenyAmountField"
-        type="number"
-      />
-      <Select
-        className={styles.input}
-        aria-label="Currency Type"
-        name="currencySelector"
-        options={selectorOptions}
-      />
-    </div>
+
+      <ConversionRatesInfo fromCurrency={fromCurrency} toCurrency={toCurrency} rate={currentRate} />
     </>
-  )
-
-
-}
+  );
+};
 
 export { CurrencyConverter };
