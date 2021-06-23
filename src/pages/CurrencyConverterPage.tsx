@@ -1,23 +1,25 @@
 import * as React from 'react';
-import { useCurrencyConverterApi } from '../api/useCurrencyConverterApi';
-import { CurrencySymbols } from '../api/ICurrencyConverterApi';
+import { useCurrencySymbols, DataStatus } from './useCurrencySymbols';
+import { Spinner } from '../components/Spinner';
+import { Card } from '../components/Card';
+import { CurrencyConverter } from '../components/CurrencyConverter';
+
+import styles from './CurrencyConverterPage.module.css';
 
 const CurrencyConverterPage = () => {
-  const [symbols, setSymbols] = React.useState<CurrencySymbols>();
+  const { status, data, error} = useCurrencySymbols();
 
-  const api = useCurrencyConverterApi();
+  console.log(status, data, error);
 
-  React.useEffect(() => {
-    async function request() {
-      const symbols = await api.fetchCurrencySymbols();
-      setSymbols(symbols);
-    }
-    request();
-  }, [api])
-
-  console.log(symbols);
-
-  return <code>{JSON.stringify(symbols)}</code>
-}
+  return (
+    <div className={styles.pageContainer}>
+      <Card className={styles.currencyConverterCard}>
+        { status === DataStatus.Fetching && <Spinner className={styles.loader} />}
+        { status === DataStatus.Error && <div>{error}</div> }
+        { status === DataStatus.HasResults && <CurrencyConverter symbols={data} />}
+      </Card>
+    </div>
+  );
+};
 
 export { CurrencyConverterPage };
