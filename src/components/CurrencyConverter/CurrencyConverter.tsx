@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useCurrencyConverterApi } from '../../api/useCurrencyConverterApi';
+import { useExchangeRatesApi } from '../../api/ExchangeRatesApi/useExchangeRatesApi';
 import { ConversionRatesInfo } from './ConversionRatesInfo';
 import { CurrencyRow } from './CurrencyRow';
 import { ErrorMessage } from './ErrorMessage';
@@ -7,7 +7,7 @@ import { Spinner } from '../Spinner';
 import styles from './CurrencyConverter.module.css';
 
 const CurrencyConverter: React.FC = () => {
-  const currencyApi = useCurrencyConverterApi();
+  const exchangeRatesApi = useExchangeRatesApi();
   const [symbols, setSymbols] = React.useState<string[]>([]);
   const [fromCurrency, setFromCurrency] = React.useState<string>('');
   const [toCurrency, setToCurrency] = React.useState<string>('');
@@ -18,7 +18,7 @@ const CurrencyConverter: React.FC = () => {
 
   React.useEffect(() => {
     async function fetchInitialData() {
-      const data = await currencyApi.fetchLatestRates();
+      const data = await exchangeRatesApi.fetchLatestRates();
 
       const symbols = Object.keys(data.rates);
 
@@ -28,13 +28,15 @@ const CurrencyConverter: React.FC = () => {
       setRates(data.rates);
     }
     fetchInitialData();
-  }, [currencyApi]);
+  }, [exchangeRatesApi]);
 
-  const updateRates = React.useCallback(async (baseCurrency, toCurrency) => {
-    const data = await currencyApi.fetchLatestRates(baseCurrency, [toCurrency]);
-    setRates(data.rates);
-  }, [currencyApi]);
-
+  const updateRates = React.useCallback(
+    async (baseCurrency, toCurrency) => {
+      const data = await exchangeRatesApi.fetchLatestRates(baseCurrency, [toCurrency]);
+      setRates(data.rates);
+    },
+    [exchangeRatesApi],
+  );
 
   const handleOnChangeFromAmount = React.useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -70,7 +72,6 @@ const CurrencyConverter: React.FC = () => {
     [],
   );
 
-
   const { fromValue, toValue, currentRate } = React.useMemo(() => {
     const currentRate = rates[toCurrency];
 
@@ -79,18 +80,18 @@ const CurrencyConverter: React.FC = () => {
         toValue: (amount * currentRate).toFixed(2),
         fromValue: amount,
         currentRate,
-      }
+      };
     }
     return {
       fromValue: (amount / currentRate).toFixed(2),
       toValue: amount,
       currentRate,
-    }
-  },[rates, toCurrency, isEdittingUsingFromInput, amount]);
+    };
+  }, [rates, toCurrency, isEdittingUsingFromInput, amount]);
 
-  const isLoading = !fromCurrency || !toCurrency  || !rates;
+  const isLoading = !fromCurrency || !toCurrency || !rates;
   if (isLoading) {
-    return <Spinner className={styles.loader} />
+    return <Spinner className={styles.loader} />;
   }
 
   return (

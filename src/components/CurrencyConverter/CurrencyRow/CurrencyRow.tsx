@@ -11,10 +11,6 @@ type CurrencyRowProps = {
   onChangeCurrency(event: React.ChangeEvent<HTMLSelectElement>): void;
 };
 
-function mapToSelectOption(symbol: string) {
-  return { value: symbol, label: symbol };
-}
-
 const CurrencyRow: React.FC<CurrencyRowProps> = ({
   inputValue,
   currencyValue,
@@ -24,6 +20,10 @@ const CurrencyRow: React.FC<CurrencyRowProps> = ({
 }) => {
 
   const selectorOptions = React.useMemo(() => {
+    function mapToSelectOption(symbol: string) {
+      return { value: symbol, label: symbol };
+    }
+
     return currencySymbols.map(mapToSelectOption) || [];
   }, [currencySymbols]);
 

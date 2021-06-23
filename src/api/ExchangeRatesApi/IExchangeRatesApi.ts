@@ -1,5 +1,10 @@
-export interface ICurrencyConveterApi {
+export interface IExchangeRatesApi {
   fetchLatestRates(base?: string, symbols?: string[]): Promise<LatestRatesDto>;
+}
+
+export type LatestRatesDto = {
+  base: string;
+  rates: Record<string, number>;
 }
 
 export type ApiError = {
@@ -8,9 +13,3 @@ export type ApiError = {
     message: string;
   }
 }
-
-export type LatestRatesDto = {
-  base: string;
-  rates: Record<string, number>;
-}
-
