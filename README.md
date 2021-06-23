@@ -1,55 +1,43 @@
-### TODO
+# Currency Converter
 
-- Loading spinner/state before render form
-- Perform api requests wisely, instead of two consecutive ones (waiting for reply from API)
-- Check mobile
-- Check ally1
-- Deploy
+Simple web-based currency converter using [ExchangeRates Api](https://exchangeratesapi.io/). 
 
+Once the web application is loaded, it fetches the latest rates and currencies available and display them, allowing the user to convert values from one currency to another. The currency conversion is fully done on the application itself, not using any 3rd party API's.
 
-# Getting Started with Create React App
+*Disclaimer*: The base currency for the Free plan of `ExchangeRates` platform is limited to `EUR`. Therefore, selecting other currencies as `base` won't work unfortunately.
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Project libraries
 
-## Available Scripts
+The project was created using `create-react-app` to scaffold the basic structure. I opted to not introduce other 3rd party libraries apart from `Typescript` and `normalize.css`.
+## Follow up improvements
 
-In the project directory, you can run:
+- The currency input can be improved as it is handling comas but not dots. When the user adds a dot, input is cleaned up.
 
-### `yarn start`
+- Localization could be introduced here by `Intl.NumberFormat`. User locale could be taken into consideration in order to format the text of the input fields properly. Besides that, the selected `currency symbol` in the `<select>` markup could be taken into consideration in order to add prefix-sufix in the input with the proper symbol. (Ex: Show `£ 3.50` if user selects `GBP`)
+
+- Unit tests could be added to cover API calls, Hooks, and also Component's behavior and UI
+
+- E2E tests could be added, although rely on the `ExchangeRatesApi` using live data would not be the ideal scenario to assert the values of the conversions. For that case, some extra setup is required to create an specific environemnt that would provide the API with some proper mocked data
+
+## Running the project
+
+In order to run the project locally, you should create `.env` file in the root folder and provide there your `access key` for the ExchangeRates platform.
+
+```
+REACT_APP_ACCESS_KEY_EXCHANGE_RATES=${MY_ACCESS_KEY}
+```
+
+After doing that, be sure you have installed all dependencies, so you can run:
+
+#### `npm start`
 
 Runs the app in the development mode.\
 Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+#### `npm test`
 
-### `yarn test`
+Launches the test runner in the interactive watch mode.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `yarn build`
+#### `npm run build`
 
 Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `yarn eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
