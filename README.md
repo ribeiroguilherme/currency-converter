@@ -1,3 +1,12 @@
+### TODO
+
+- Loading spinner/state before render form
+- Perform api requests wisely, instead of two consecutive ones (waiting for reply from API)
+- Check mobile
+- Check ally1
+- Deploy
+
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).

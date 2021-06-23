@@ -4,14 +4,8 @@
   margin-top: 80px;
 }
 
-.loader {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-}
-
 .currencyConverterCard {
-  min-height: 140px;
-  min-width: 300px;
+  width: 500px;
+  min-height: 200px;
+  box-sizing: border-box;
 }

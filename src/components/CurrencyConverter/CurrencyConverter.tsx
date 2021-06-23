@@ -2,7 +2,8 @@ import * as React from 'react';
 import { useCurrencyConverterApi } from '../../api/useCurrencyConverterApi';
 import { ConversionRatesInfo } from './ConversionRatesInfo';
 import { CurrencyRow } from './CurrencyRow';
-
+import { ErrorMessage } from './ErrorMessage';
+import { Spinner } from '../Spinner';
 import styles from './CurrencyConverter.module.css';
 
 const CurrencyConverter: React.FC = () => {
@@ -13,9 +14,10 @@ const CurrencyConverter: React.FC = () => {
   const [isEdittingUsingFromInput, setIsEdittingUsingFromInput] = React.useState<boolean>(true);
   const [amount, setAmount] = React.useState<number>(1);
   const [rates, setRates] = React.useState<Record<string, number>>({});
+  const [error, setError] = React.useState<string>('');
 
   React.useEffect(() => {
-    async function fetchData() {
+    async function fetchInitialData() {
       const data = await currencyApi.fetchLatestRates();
 
       const symbols = Object.keys(data.rates);
@@ -25,24 +27,14 @@ const CurrencyConverter: React.FC = () => {
       setToCurrency(symbols[0]);
       setRates(data.rates);
     }
-    fetchData();
+    fetchInitialData();
   }, [currencyApi]);
 
-  // const updateRates = React.useCallback(async (baseCurrency, toCurrency) => {
-  //   const data = await currencyApi.fetchLatestRates(fromCurrency, [toCurrency]);
-  //   setRate(data.rates[toCurrency]);
-  // }, [currencyApi, fromCurrency, toCurrency]);
+  const updateRates = React.useCallback(async (baseCurrency, toCurrency) => {
+    const data = await currencyApi.fetchLatestRates(baseCurrency, [toCurrency]);
+    setRates(data.rates);
+  }, [currencyApi]);
 
-  React.useEffect(() => {
-    async function fetchData() {
-      const data = await currencyApi.fetchLatestRates(fromCurrency, [toCurrency]);
-      setRates(data.rates);
-    }
-
-    if (fromCurrency && toCurrency) {
-      fetchData();
-    }
-  }, [currencyApi, fromCurrency, toCurrency]);
 
   const handleOnChangeFromAmount = React.useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -58,10 +50,17 @@ const CurrencyConverter: React.FC = () => {
   }, []);
 
   const handleOnSelectFromCurrency = React.useCallback(
-    (event: React.ChangeEvent<HTMLSelectElement>) => {
-      setFromCurrency(event.target.value);
+    async (event: React.ChangeEvent<HTMLSelectElement>) => {
+      try {
+        await updateRates(event.target.value, toCurrency);
+        setFromCurrency(event.target.value);
+        setError('');
+      } catch (error) {
+        setFromCurrency(fromCurrency);
+        setError(error.message);
+      }
     },
-    [],
+    [updateRates, fromCurrency, toCurrency],
   );
 
   const handleOnSelectToCurrency = React.useCallback(
@@ -71,15 +70,27 @@ const CurrencyConverter: React.FC = () => {
     [],
   );
 
-  let fromValue, toValue;
-  const currentRate = rates[toCurrency];
 
-  if (isEdittingUsingFromInput) {
-    toValue = (amount * currentRate).toFixed(2);
-    fromValue = amount;
-  } else {
-    fromValue = (amount / currentRate).toFixed(2);
-    toValue = amount;
+  const { fromValue, toValue, currentRate } = React.useMemo(() => {
+    const currentRate = rates[toCurrency];
+
+    if (isEdittingUsingFromInput) {
+      return {
+        toValue: (amount * currentRate).toFixed(2),
+        fromValue: amount,
+        currentRate,
+      }
+    }
+    return {
+      fromValue: (amount / currentRate).toFixed(2),
+      toValue: amount,
+      currentRate,
+    }
+  },[rates, toCurrency, isEdittingUsingFromInput, amount]);
+
+  const isLoading = !fromCurrency || !toCurrency  || !rates;
+  if (isLoading) {
+    return <Spinner className={styles.loader} />
   }
 
   return (
@@ -103,6 +114,8 @@ const CurrencyConverter: React.FC = () => {
       />
 
       <ConversionRatesInfo fromCurrency={fromCurrency} toCurrency={toCurrency} rate={currentRate} />
+
+      <ErrorMessage>{error}</ErrorMessage>
     </>
   );
 };
