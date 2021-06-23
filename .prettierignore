@@ -1,0 +1,7 @@
+.coverage/
+.out/
+.github/
+dist/
+build/
+node_modules/
+*.md
