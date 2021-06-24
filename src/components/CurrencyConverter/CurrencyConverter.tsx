@@ -12,7 +12,7 @@ const CurrencyConverter: React.FC = () => {
   const [fromCurrency, setFromCurrency] = React.useState<string>('');
   const [toCurrency, setToCurrency] = React.useState<string>('');
   const [isEdittingUsingFromInput, setIsEdittingUsingFromInput] = React.useState<boolean>(true);
-  const [amount, setAmount] = React.useState<number>(1);
+  const [amount, setAmount] = React.useState<number | null>(1);
   const [rates, setRates] = React.useState<Record<string, number>>({});
   const [error, setError] = React.useState<string>('');
 
@@ -41,14 +41,16 @@ const CurrencyConverter: React.FC = () => {
   const handleOnChangeFromAmount = React.useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       setIsEdittingUsingFromInput(true);
-      setAmount(parseFloat(event.target.value));
+      const val = event.target.value;
+      setAmount(val ? parseFloat(val) : null);
     },
     [],
   );
 
   const handleOnChangeToAmount = React.useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     setIsEdittingUsingFromInput(false);
-    setAmount(parseFloat(event.target.value));
+    const val = event.target.value;
+    setAmount(val ? parseFloat(val) : null);
   }, []);
 
   const handleOnSelectFromCurrency = React.useCallback(
@@ -68,12 +70,17 @@ const CurrencyConverter: React.FC = () => {
   const handleOnSelectToCurrency = React.useCallback(
     (event: React.ChangeEvent<HTMLSelectElement>) => {
       setToCurrency(event.target.value);
+      setError('');
     },
     [],
   );
 
   const { fromValue, toValue, currentRate } = React.useMemo(() => {
     const currentRate = rates[toCurrency];
+
+    if (!amount) {
+      return { toValue: '', fromValue: '', currentRate }
+    }
 
     if (isEdittingUsingFromInput) {
       return {

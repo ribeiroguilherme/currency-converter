@@ -8,8 +8,8 @@ export type LatestRatesDto = {
 }
 
 export type ApiError = {
-  error: {
-    code: string;
-    message: string;
-  }
+  description: string;
+  error: boolean;
+  message: string;
+  status: number;
 }
